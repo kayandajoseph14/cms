@@ -1,10 +1,13 @@
 package com.inn.cafe.rest;  // Package declaration for REST controllers
 
+import com.inn.cafe.wrapper.UserWrapper;
 import org.springframework.http.ResponseEntity;  // Importing ResponseEntity for handling HTTP responses
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;  // Importing annotation for handling POST requests
 import org.springframework.web.bind.annotation.RequestBody;  // Importing annotation for binding the request body to a method parameter
 import org.springframework.web.bind.annotation.RequestMapping;  // Importing annotation for mapping web requests
 
+import java.util.List;
 import java.util.Map;  // Importing Map to handle the request data as key-value pairs
 
 // This annotation maps requests to the "/user" path, making this interface a REST controller for user-related operations.
@@ -23,4 +26,12 @@ public interface UserRest {
     public ResponseEntity<String> login(
             @RequestBody(required = true) Map<String, String> requestMap // Maps the JSON of the request to a Map
     );
+
+    // Method for getting all users
+    @GetMapping(path = "/get")
+    public ResponseEntity<List<UserWrapper>> getAllUser();
+
+    // Method for updating user
+    @PostMapping(path = "/update")
+    public ResponseEntity<String> update(@RequestBody(required = true) Map<String,String> requestMap);
 }

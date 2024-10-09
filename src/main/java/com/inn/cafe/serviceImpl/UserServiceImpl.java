@@ -1,12 +1,15 @@
 package com.inn.cafe.serviceImpl;
 
 import com.inn.cafe.JWT.CustomerUsersDetailsService;
+import com.inn.cafe.JWT.JwtFilter;
 import com.inn.cafe.JWT.JwtUtil;
 import com.inn.cafe.POJO.User;
 import com.inn.cafe.constants.CafeConstants;
 import com.inn.cafe.dao.UserDao;
 import com.inn.cafe.service.UserService;
 import com.inn.cafe.utils.CafeUtils;
+import com.inn.cafe.utils.EmailUtils;
+import com.inn.cafe.wrapper.UserWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,8 +19,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -34,6 +36,11 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     JwtUtil jwtUtil;
+    @Autowired
+    JwtFilter jwtFilter;
+
+    @Autowired
+    EmailUtils emailUtils;
 
     /**
      * Handles the user signup process.
@@ -110,25 +117,73 @@ public class UserServiceImpl implements UserService {
         log.info("Inside login");
         try {
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(requestMap.get("email"),requestMap.get("password"))
+                    new UsernamePasswordAuthenticationToken(requestMap.get("email"), requestMap.get("password"))
             );
 
-            if (authentication.isAuthenticated()){
-                if (customerUsersDetailsService.getUserDetail().getStatus().equalsIgnoreCase("false")){
-                    return new ResponseEntity<String>("{\"token\":\""+
+            if (authentication.isAuthenticated()) {
+                if (customerUsersDetailsService.getUserDetail().getStatus().equalsIgnoreCase("true")) {
+                    return new ResponseEntity<String>("{\"token\":\"" +
                             jwtUtil.generateToken(customerUsersDetailsService.getUserDetail().getEmail(),
-                                    customerUsersDetailsService.getUserDetail().getRole()) +"\"}",
+                                    customerUsersDetailsService.getUserDetail().getRole()) + "\"}",
                             HttpStatus.OK);
-                }else{
-                    return new ResponseEntity<String>("{\"message\":\""+"wait for admin approval."+"\"}",
+                } else {
+                    return new ResponseEntity<String>("{\"message\":\"" + "wait for admin approval." + "\"}",
                             HttpStatus.BAD_REQUEST);
                 }
             }
 
-        }catch (Exception ex){
-            log.error("{}",ex);
+        } catch (Exception ex) {
+            log.error("{}", ex);
         }
-        return new ResponseEntity<String>("{\"message\":\""+"Wrong credentials."+"\"}",
+        return new ResponseEntity<String>("{\"message\":\"" + "Wrong credentials." + "\"}",
                 HttpStatus.BAD_REQUEST);
+    }
+
+    @Override
+    public ResponseEntity<List<UserWrapper>> getAllUser() {
+        try {
+            if (jwtFilter.isAdmin()) {
+                return new ResponseEntity<>(userDao.getAllUser(), HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(new ArrayList<>(), HttpStatus.UNAUTHORIZED);
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        return new ResponseEntity<List<UserWrapper>>(new ArrayList<>(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Override
+    public ResponseEntity<String> update(Map<String, String> requestMap) {
+        try {
+            if (jwtFilter.isAdmin()) {
+                Optional<User> optional = userDao.findById(Integer.parseInt(requestMap.get("id")));
+                if (!optional.isEmpty()) {
+                    userDao.updateStatus(requestMap.get("status"), Integer.parseInt(requestMap.get("id")));
+                    getMailToAllAdmin(requestMap.get("status"), optional.get().getEmail(), userDao.getAllAdmin());
+                    return CafeUtils.getResponseEntity("User status updated successful", HttpStatus.OK);
+                } else {
+                    return CafeUtils.getResponseEntity("User Id doesn't exists", HttpStatus.OK);
+                }
+            } else {
+                CafeUtils.getResponseEntity(CafeConstants.UNAUTHORIZED_ACCESS, HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        // If something goes wrong, return a generic error response
+        return CafeUtils.getResponseEntity(CafeConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    private void getMailToAllAdmin(String status, String user, List<String> allAdmin) {
+        allAdmin.remove(jwtFilter.getCurrentUser());
+        if (status != null && status.equalsIgnoreCase("true")) {
+            emailUtils.sendSimpleMessage(jwtFilter.getCurrentUser(), "Account Approved","USER:-"+ user + "\n is approved by \n ADMIN:-"+ jwtFilter.getCurrentUser(),allAdmin);
+        }else{
+            emailUtils.sendSimpleMessage(jwtFilter.getCurrentUser(), "Account Disabled","USER:-"+ user + "\n is disabled by \n ADMIN:-"+ jwtFilter.getCurrentUser(),allAdmin);
+        }
     }
 }

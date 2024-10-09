@@ -18,4 +18,6 @@ public class CafeConstants {
 
     // Message returned upon successful user registration.
     public static final String SUCCESSFUL_REGISTERED = "Successful Registered.";
+
+    public static final String UNAUTHORIZED_ACCESS = "Unauthorized Access";
 }

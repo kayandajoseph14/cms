@@ -14,7 +14,7 @@ import java.util.function.Function;
 @Service
 public class JwtUtil {
 
-    private String secret = "bruteforce";  // Secret key used to sign the JWT
+    private String secret = "Admin@@@&&&###$$$";  // Secret key used to sign the JWT
 
     // Extracts the username (subject) from the JWT token
     public String extractUsername(String token) {
@@ -58,7 +58,7 @@ public class JwtUtil {
                 .setClaims(claims)
                 .setSubject(subject)  // Set the username as the subject
                 .setIssuedAt(new Date(System.currentTimeMillis()))  // Set the issued date
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))  // Set expiration to 10 hours
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60))  // Set expiration to 10 hours
                 .signWith(SignatureAlgorithm.HS256, secret)  // Sign the token using HS256 algorithm
                 .compact();  // Create and return the JWT string
     }
