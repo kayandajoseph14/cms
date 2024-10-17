@@ -58,7 +58,7 @@ public class JwtUtil {
                 .setClaims(claims)
                 .setSubject(subject)  // Set the username as the subject
                 .setIssuedAt(new Date(System.currentTimeMillis()))  // Set the issued date
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60))  // Set expiration to 10 hours
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 5))  // Set expiration to 5 minutes
                 .signWith(SignatureAlgorithm.HS256, secret)  // Sign the token using HS256 algorithm
                 .compact();  // Create and return the JWT string
     }

@@ -19,4 +19,10 @@ public interface UserService {
 
     // Method to update user details, accepts a map of request parameters and returns a ResponseEntity
     ResponseEntity<String> update(Map<String, String> requestMap);
+
+    ResponseEntity<String> checkToken();
+
+    ResponseEntity<String> changePassword(Map<String, String> requestMap);
+
+    ResponseEntity<String> forgotPassword(Map<String, String> requestMap);
 }

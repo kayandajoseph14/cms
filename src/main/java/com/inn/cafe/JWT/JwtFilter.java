@@ -100,6 +100,6 @@ public class JwtFilter extends OncePerRequestFilter {
      * @return The username extracted from the JWT token
      */
     public String getCurrentUser() {
-        return userName; // Return the username extracted from the token
+        return userName; // Return the username(email) extracted from the token
     }
 }

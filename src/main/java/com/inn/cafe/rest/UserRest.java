@@ -27,11 +27,23 @@ public interface UserRest {
             @RequestBody(required = true) Map<String, String> requestMap // Maps the JSON of the request to a Map
     );
 
-    // Method for getting all users
+    // Method for getting users based on role user
     @GetMapping(path = "/get")
     public ResponseEntity<List<UserWrapper>> getAllUser();
 
     // Method for updating user
     @PostMapping(path = "/update")
     public ResponseEntity<String> update(@RequestBody(required = true) Map<String,String> requestMap);
+
+    // Method for checking token
+    @GetMapping(path = "/checkToken")
+    public ResponseEntity<String> checkToken();
+
+    // Method for changePassword
+    @PostMapping(path = "/changePassword")
+    public ResponseEntity<String> changePassword(@RequestBody(required = true) Map<String, String> requestMap);
+
+    // Password recovery
+    @PostMapping(path = "/forgotPassword")
+    public ResponseEntity<String> forgotPassword(@RequestBody(required = true) Map<String, String> requestMap);
 }

@@ -8,7 +8,7 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import java.io.Serializable;
 
-// Named query for finding a user by their email. This query is associated with the User entity.
+// Named query
 @NamedQuery(name = "User.findByEmailId", query = "select u from User u where u.email=:email")
 @NamedQuery(name = "User.getAllUser", query = "select new com.inn.cafe.wrapper.UserWrapper(u.id,u.name,u.email,u.contactNumber,u.status) from User u where u.role='user'")
 @NamedQuery(name = "User.updateStatus", query = "update User u set u.status=:status where u.id =:id")
@@ -19,7 +19,7 @@ import java.io.Serializable;
 @Entity  // Specifies that this class is an entity mapped to a database table.
 @DynamicUpdate  // Ensures that only changed columns are updated in the database.
 @DynamicInsert  // Ensures that only non-null fields are included in the insert statement.
-@Table(name = "user", uniqueConstraints = {
+@Table(name = "\"user\"", uniqueConstraints = {
         @UniqueConstraint(columnNames = "email"),  // Enforces uniqueness on the 'email' column.
         @UniqueConstraint(columnNames = "contactNumber")  // Enforces uniqueness on the 'contactNumber' column.
 })
